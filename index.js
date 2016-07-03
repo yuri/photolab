@@ -1,6 +1,5 @@
 var R = require('ramda');
 
-
 function importFiles() {
   var importer = require('./lib/import/importer.js');
   importer.import({
@@ -16,9 +15,7 @@ function preSquash() {
 
   var out = R.pipe(
     destination.getSquashableFolders,
-    R.map(function(record) {
-      return ['  ', record.name].concat(record.sources).join(' '); 
-    }),
+    R.map(record => record.name),
     R.join('\n')
   )([]);
 
@@ -53,15 +50,18 @@ function renameAndSquash() {
     R.filter(function(x) {
       return x.length;
     }),
-    R.map(R.split(/\s+/)),
-    R.map(function(record) {
-      var squash = (record[0] === 's');
-      var name = record[1];
-      var originalName = name.slice(0, 12);
-
-      var sources = R.filter(function(extension) {
-        return extension !== '.---';
-      })([record[2], record[3]]);
+    // R.map(R.split(/\s+/)),
+    R.map(function(line) {
+      var squash = line.startsWith('  ');
+      var rawName = line.trim();
+      var originalName = rawName.split('  ')[0];
+      var newEnding = (rawName.split('  ')[1] || '').replace('\'', '’');
+      var baseName = rawName.slice(0, 12);
+      var name = baseName + ' ▪ ' + newEnding;
+      var sources = ['.JPG', '.MTS'];
+      // R.filter(function(extension) {
+      //   return extension !== '.---';
+      // })([record[2], record[3]]);
 
       if (squash) {
         console.log('# Merging ', originalName, 'into', lastFolder, sources);
@@ -79,7 +79,17 @@ function renameAndSquash() {
   process().then(null, function(error) {console.error(error);});
 }
 
-renameAndSquash();
+const command= process.argv[2];
+
+if (command==='i') {
+  importFiles();
+} else if (command==='l') {
+  preSquash();
+} else if(command==='p') {
+  renameAndSquash();
+} else {
+  console.log('Please specify a valid option');
+}
 
 
 

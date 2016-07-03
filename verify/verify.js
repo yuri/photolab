@@ -2,7 +2,7 @@
 var fs = require('fs');
 var R = require('ramda');
 
-var data = fs.readFileSync('verify/md5.txt').toString();
+var data = fs.readFileSync('verify/hash.txt').toString();
 
 var src = {};
 var dest = {};
